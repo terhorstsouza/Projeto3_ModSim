@@ -6,7 +6,6 @@ Created on Tue May 22 11:18:40 2018
 Projeto 3 de ModSim
 
 """
-
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
@@ -23,7 +22,7 @@ peso = peso_pessoa + peso_traje
 # Encontrado na Literatura
 area_pessoa = 0.18
 
-area_paraquedas = 39.4838 # De 32.5161m2 a 46.4515m2 => usamos a média
+area_paraquedas = 30 # De 32.5161m2 a 46.4515m2 => usamos a média
 
 g = 9.8
 
@@ -50,36 +49,7 @@ def drag(parachute, d, velocidade):
     return Far
 
 def dAr(altitude):
-    if altitude <= 1000:
-        densidade = 11.12
-    elif altitude <= 2000:
-        densidade = 10.07
-    elif altitude <= 3000:
-        densidade = 9.093
-    elif altitude <= 4000:
-        densidade = 8.194
-    elif altitude <= 5000:
-        densidade = 7.364
-    elif altitude <= 6000:
-        densidade = 6.601
-    elif altitude <= 7000:
-        densidade = 5.9
-    elif altitude <= 8000:
-        densidade = 5.258
-    elif altitude <= 9000:
-        densidade = 4.671
-    elif altitude <= 10000:
-        densidade = 4.135
-    elif altitude <= 15000:
-        densidade = 1.948
-    elif altitude <= 20000:
-        densidade = 0.8891
-    elif altitude <= 25000:
-        densidade = 0.4008
-    elif altitude <= 30000:
-        densidade = 0.1841
-    elif altitude <= 40000:
-        densidade = 0.03996
+    densidade = 14.9812604381766 * np.exp(-0.00014471277003936 * altitude)
     return densidade
 
 def EqDif(Ci, t):
@@ -116,6 +86,8 @@ plt.title('Velocidade em Função do Tempo')
 plt.xlabel('Tempo (s)')
 plt.ylabel('Velocidade (m/s)')
 plt.show()
+
+print (max(resultado[:,1]))
     
     
     
