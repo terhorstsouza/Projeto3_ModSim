@@ -15,16 +15,14 @@ peso_pessoa = 73 #kg
 
 altura_pessoa = 170 #cm
 
-peso_traje = 37 #kg
+peso_traje = 45 #kg
 
 peso = peso_pessoa + peso_traje
 
 # Encontrado na Literatura
 area_pessoa = 0.18
 
-area_paraquedas = 30 # De 32.5161m2 a 46.4515m2 => usamos a média
-
-g = 9.8
+area_paraquedas = 25 # Informação encontrada em Red Bull Stratos
 
 altura_inicial = 39014 # altitude do pulo original
 
@@ -34,7 +32,7 @@ v_inicial = 0
 
 delta_t = 0.01
 
-t = np.arange(0, 600 + delta_t, delta_t)
+t = np.arange(0, 1000 + delta_t, delta_t)
 
 Ci = [altura_inicial, v_inicial]
 
@@ -43,10 +41,14 @@ def drag(parachute, d, velocidade):
         Cd = 0.5 # Coeficiente de arrasto de uma pessoa => Literatura
         area = area_pessoa
     else:
-        Cd = 1.75
+        Cd = 0.75
         area = area_paraquedas
     Far = Cd * ((d * velocidade ** 2) / 2) * area
     return Far
+
+def k_gravidade(altitude):
+    gravidade = (-0.0000030646) * altitude + 9.8066215751
+    return gravidade
 
 def dAr(altitude):
     densidade = 14.9812604381766 * np.exp(-0.00014471277003936 * altitude)
@@ -60,14 +62,16 @@ def EqDif(Ci, t):
         parachute = False
     else:
         parachute = True
-    if sy > 0:
-        dsydt = -vy
+    
+    dsydt = -vy
         
-        dvydt = g - (drag(parachute, dAr(sy), vy) / peso)
-    else:
-        dsydt = 0
+    dvydt = k_gravidade(sy) - (drag(parachute, dAr(sy), vy) / peso)
+    
+    if sy + dsydt < 0:
         
-        dvydt = 0
+        dsydt = 0 - sy
+        
+        dvydt = 0 - vy
     
     return dsydt, dvydt
 
