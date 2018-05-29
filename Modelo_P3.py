@@ -10,6 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
+''' Implementação do Modelo '''
+
 # Encontrado na literatura:
 peso_pessoa = 73 #kg
 
@@ -30,14 +32,8 @@ altura_paraquedas = 1524
 
 v_inicial = 0
 
-delta_t = 0.01
-
-t = np.arange(0, 1000 + delta_t, delta_t)
-
-Ci = [altura_inicial, v_inicial]
-
-def drag(parachute, d, velocidade):
-    if not parachute:
+def drag(sy, d, velocidade):
+    if sy > altura_paraquedas:
         Cd = 0.5 # Coeficiente de arrasto de uma pessoa => Literatura
         area = area_pessoa
     else:
@@ -54,46 +50,108 @@ def dAr(altitude):
     densidade = 14.9812604381766 * np.exp(-0.00014471277003936 * altitude)
     return densidade
 
+delta_t = 0.01
+
+t = np.arange(0, 1000 + delta_t, delta_t)
+
+Ci = [altura_inicial, v_inicial]
+
 def EqDif(Ci, t):
     sy = Ci[0]
     vy = Ci[1]
     
-    if sy > altura_paraquedas:
-        parachute = False
-    else:
-        parachute = True
-    
-    dsydt = -vy
+    dsydt = vy
         
-    dvydt = k_gravidade(sy) - (drag(parachute, dAr(sy), vy) / peso)
-    
-    if sy + dsydt < 0:
-        
-        dsydt = 0 - sy
-        
-        dvydt = 0 - vy
+    dvydt = (-(peso * k_gravidade(sy)) + drag(sy, dAr(sy), vy)) / peso
     
     return dsydt, dvydt
 
 resultado = odeint(EqDif, Ci, t)
+posicao = []
+for p in resultado[:,0]:
+    if p >= 0:
+        posicao.append(p)
+    else:
+        posicao.append(0)
 
-plt.plot(t, resultado[:,0])
+velocidade = []       
+for i in range(len(resultado[:,1])):
+    if resultado[:,0][i] >= 0:
+        velocidade.append(-resultado[:,1][i])
+    else:
+        velocidade.append(0)
+
+plt.plot(t, posicao)
 plt.grid(True)
 plt.title('Altitude em Função do Tempo')
 plt.xlabel('Tempo (s)')
 plt.ylabel('Altitude (m)')
 plt.show()
 
-plt.plot(t, resultado[:,1])
+plt.plot(t, velocidade)
 plt.grid(True)
 plt.title('Velocidade em Função do Tempo')
 plt.xlabel('Tempo (s)')
 plt.ylabel('Velocidade (m/s)')
 plt.show()
 
-print (max(resultado[:,1]))
+EC = []
+EGP = []
+EM = []
+TD = [0]
+
+tempo_validacao = int(290 / delta_t) + 1
+
+t = np.arange(0, 290 + delta_t, delta_t)
+
+p_validacao = []
+v_validacao = []
+for i in range(tempo_validacao):
+    p_validacao.append(posicao[i])
+    v_validacao.append(velocidade[i])
     
+for h in p_validacao: 
+    EGP.append(peso * k_gravidade(h) * h)
     
+for i in range(1, len(p_validacao)):
+    TD.append(TD[i-1] + drag(p_validacao[i], dAr(p_validacao[i]),
+                   v_validacao[i]) * (p_validacao[i-1] - p_validacao[i]))
+
+for v in v_validacao:
+    EC.append((peso * v ** 2) / 2)
+    
+for e in range(len(EC)):
+    EM.append(EC[e] + EGP[e])
+    
+plt.plot(t, EM, label = 'Energia Mecância')
+plt.plot(t, TD, label = 'Trabalho Drag')
+plt.legend()
+plt.xlabel('Tempo (s)')
+plt.ylabel('Energia (J)')
+plt.title('Validação')
+plt.grid(True)
+plt.show()
+
+somaTD = 0
+somaEM = 0
+validacao = []
+
+for valor in TD:
+    somaTD += valor
+    somaEM += valor
+    validacao.append(somaTD - somaEM)
+    
+plt.plot(t, validacao)
+plt.grid(True)
+plt.xlabel('Tempo (s)')
+plt.ylabel('Energia Mecância - Trabalho Drag')
+plt.show()
+
+
+
+
+    
+  
     
 
 
