@@ -148,10 +148,48 @@ plt.ylabel('Energia Mecância - Trabalho Drag')
 plt.show()
 
 
+#GRÁFICO CONCLUSIVO
+#Felix alcançou Mach 1.25 à 338 m/s
+#A Velocidade do som é de 330 m/s
 
 
+lista_altitudes = np.arange(38014,39015,1)
+
+
+resultados_velox = []
+resultados_posic = []
+velocidade2 = []     
+for alts in lista_altitudes:
+    print(alts)
+    CI = [alts, v_inicial]
+    solucao = odeint(EqDif,CI,t)
     
-  
+      
+    for i in range(len(solucao[:,1])):
+        if solucao[:,0][i] >= 0:
+            velocidade2.append(-solucao[:,1][i])
+        else:
+            velocidade2.append(0)
+        
+    resultados_velox.append(max(velocidade2))
+    resultados_posic.append(max(solucao[:,0]))
     
+
+for e in range(len(resultados_velox)):
+    if resultados_velox[e] >= 330 and resultados_velox[e]<= 330.1:
+        posic = resultados_posic[e]         
+        print('A posição onde a Velocidade vale 330 é: {0}'.format(posic))
+        break
+
+plt.plot(resultados_velox,resultados_posic)
+plt.plot(330,38253, 'go', label = 'Altitude mínima')
+plt.grid(True)
+plt.legend()
+plt.title('Grafico Conclusivo - Altitude mínima para se alcançar a velocidade do som')
+plt.xlabel('Velocidades')
+plt.ylabel('Altitudes')
+plt.show()
+
+
 
 
