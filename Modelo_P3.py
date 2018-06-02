@@ -151,45 +151,90 @@ plt.show()
 #GRÁFICO CONCLUSIVO
 #Felix alcançou Mach 1.25 à 338 m/s
 #A Velocidade do som é de 330 m/s
-
-
-lista_altitudes = np.arange(38014,39015,1)
-
-
-resultados_velox = []
-resultados_posic = []
-velocidade2 = []     
-for alts in lista_altitudes:
-    print(alts)
-    CI = [alts, v_inicial]
-    solucao = odeint(EqDif,CI,t)
+def EqDif2(Ci, t, m):
+    sy = Ci[0]
+    vy = Ci[1]
     
-      
-    for i in range(len(solucao[:,1])):
-        if solucao[:,0][i] >= 0:
-            velocidade2.append(-solucao[:,1][i])
-        else:
-            velocidade2.append(0)
+    dsydt = vy
         
-    resultados_velox.append(max(velocidade2))
-    resultados_posic.append(max(solucao[:,0]))
+    dvydt = (-(m * k_gravidade(sy)) + drag(sy, dAr(sy), vy)) / peso
     
+    return dsydt, dvydt
 
-for e in range(len(resultados_velox)):
-    if resultados_velox[e] >= 330 and resultados_velox[e]<= 330.1:
-        posic = resultados_posic[e]         
-        print('A posição onde a Velocidade vale 330 é: {0}'.format(posic))
-        break
+lista_altitudes = np.arange(33000,42001,25)
+lista_massa = np.arange(50, 100, 10)
+t = np.arange(0, 200 + delta_t, delta_t)
+for massa in lista_massa:
+    resultados_velox = []
+    resultados_posic = []
+    velocidade2 = []
+    m = massa + peso_traje    
+    for alts in lista_altitudes:
+        CI = [alts, v_inicial]
+        solucao = odeint(EqDif2,CI,t, args = (m,))
+        
+          
+        for i in range(len(solucao[:,1])):
+            if solucao[:,0][i] >= 0:
+                velocidade2.append(-solucao[:,1][i])
+            else:
+                velocidade2.append(0)
+            
+        resultados_velox.append(max(velocidade2))
+        resultados_posic.append(max(solucao[:,0]))
+        
+    
+    for e in range(len(resultados_velox)):
+        if resultados_velox[e] >= 330:
+            posic = resultados_posic[e]         
+            plt.plot(resultados_posic[e], resultados_velox[e], marker = 'o',
+                     color = 'black')
+            break
 
-plt.plot(resultados_velox,resultados_posic)
-plt.plot(330,38253, 'go', label = 'Altitude mínima')
+    plt.plot(resultados_posic, resultados_velox,
+             label = 'm = {0}kg'.format(massa))
 plt.grid(True)
 plt.legend()
-plt.title('Grafico Conclusivo - Altitude mínima para se alcançar a velocidade do som')
-plt.xlabel('Velocidades')
-plt.ylabel('Altitudes')
+plt.title('Altitude do Salto x Velocidade Máxima')
+plt.xlabel('Altitude Inicial (m)')
+plt.ylabel('Velocidade Máxima (m/s)')
 plt.show()
 
+lista_massa = np.arange(50, 120, 5)
+for massa in lista_massa:
+    resultados_velox = []
+    resultados_posic = []
+    velocidade2 = []
+    m = massa + peso_traje    
+    for alts in lista_altitudes:
+        CI = [alts, v_inicial]
+        solucao = odeint(EqDif2,CI,t, args = (m,))
+        
+          
+        for i in range(len(solucao[:,1])):
+            if solucao[:,0][i] >= 0:
+                velocidade2.append(-solucao[:,1][i])
+            else:
+                velocidade2.append(0)
+            
+        resultados_velox.append(max(velocidade2))
+        resultados_posic.append(max(solucao[:,0]))
+        
+    
+    for e in range(len(resultados_velox)):
+        if resultados_velox[e] >= 330:
+            posic = resultados_posic[e]         
+            plt.plot(massa, resultados_posic[e], 'ro')
+            if massa == 120:
+                print('Para que uma pessoa de 120kg alcance a velocidade do\
+                      som, ela teria que pular de {0}m de altitude.\
+                      '.format(resultados_posic[e]))
+            break
 
+plt.grid(True)
+plt.title('Gráfico Conclusivo - Altitude Inicial x Massa')
+plt.xlabel('Massa (kg)')
+plt.ylabel('Altitude Inicial (m)')
+plt.show()
 
 
