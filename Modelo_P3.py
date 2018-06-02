@@ -149,7 +149,7 @@ plt.show()
 
 
 #GRÁFICO CONCLUSIVO
-#Felix alcançou Mach 1.25 à 338 m/s
+#Felix alcançou 338 m/s
 #A Velocidade do som é de 330 m/s
 def EqDif2(Ci, t, m):
     sy = Ci[0]
@@ -200,7 +200,7 @@ plt.xlabel('Altitude Inicial (m)')
 plt.ylabel('Velocidade Máxima (m/s)')
 plt.show()
 
-lista_massa = np.arange(50, 120, 5)
+lista_massa = np.arange(50, 125, 5)
 for massa in lista_massa:
     resultados_velox = []
     resultados_posic = []
@@ -223,18 +223,18 @@ for massa in lista_massa:
     
     for e in range(len(resultados_velox)):
         if resultados_velox[e] >= 330:
-            posic = resultados_posic[e]         
-            plt.plot(massa, resultados_posic[e], 'ro')
+            posic = resultados_posic[e] / 1000        
+            plt.plot(massa, posic, 'ro')
             if massa == 120:
                 print('Para que uma pessoa de 120kg alcance a velocidade do\
-                      som, ela teria que pular de {0}m de altitude.\
-                      '.format(resultados_posic[e]))
+                      som, ela teria que pular de {0}km de altitude.\
+                      '.format(posic))
             break
 
 plt.grid(True)
 plt.title('Gráfico Conclusivo - Altitude Inicial x Massa')
 plt.xlabel('Massa (kg)')
-plt.ylabel('Altitude Inicial (m)')
+plt.ylabel('Altitude Inicial (km)')
 plt.show()
 
 
