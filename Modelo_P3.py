@@ -9,6 +9,7 @@ Projeto 3 de ModSim
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
+
 ''' Dados do Salto '''
 Ts = [0, 9.375, 18.75, 26.875, 33.75, 40.000000000000014, 47.5, 53.75, 
       60.625000000000014, 68.12500000000001, 76.25000000000001, 
@@ -56,34 +57,40 @@ peso_pessoa = 73 #kg
 
 peso_traje = 45 #kg
 
-peso = peso_pessoa + peso_traje
+peso = peso_pessoa + peso_traje # Massa total do Felix Baumgartner
 
 # Encontrado na Literatura
-area_pessoa = 0.18
+area_pessoa = 0.18 # Mergulhando de cabeça
 
 area_paraquedas = 25 # Informação encontrada em Red Bull Stratos
 
 altura_inicial = 39014 # altitude do pulo original
 
-altura_paraquedas = 1524
+altura_paraquedas = 1524 # altitude na qual Felix Baumgartner abriu o paraquedas
 
-v_inicial = 0
+v_inicial = 0 # Velocidade inicial
+
 
 def drag(sy, d, velocidade):
+    # Os valores de Cd foram encontrados na Literatura
     if sy > altura_paraquedas:
-        Cd = 0.5 # Coeficiente de arrasto de uma pessoa => Literatura
+        Cd = 0.5 # Coeficiente de arrasto de uma pessoa
         area = area_pessoa
     else:
-        Cd = 0.75
-        area = area_paraquedas
+        Cd = 0.75 # Coeficiente de arrasto do paraquedas
+        area = area_paraquedas 
     Far = Cd * ((d * velocidade ** 2) / 2) * area
     return Far
 
 def k_gravidade(altitude):
+    # Linha de tendência dos pontos encontrados na Literatura
+    # Para a faixa trabalhada podemos assumir que é uma reta
     gravidade = (-0.0000030646) * altitude + 9.8066215751
     return gravidade
 
 def dAr(altitude):
+    # Linha de tendência dos pontos encontrados na Literatura
+    # Para a faixa trabalhada podemos assumir que é exponencial
     densidade = 14.9812604381766 * np.exp(-0.00014471277003936 * altitude)
     return densidade
 
@@ -118,6 +125,8 @@ for i in range(len(resultado[:,1])):
     else:
         velocidade.append(0)
 
+# Gráfico que compara as posições do saltador em função do tempo geradas pelo
+# modelo com os dados do salto
 plt.scatter(Ts, S, label = 'Dados do Salto', marker = 'o', color = 'black')
 plt.plot(t, posicao, label = 'Modelo')
 plt.legend(fontsize = 14)
@@ -129,6 +138,8 @@ plt.xticks(fontsize = 14)
 plt.yticks(fontsize = 14)
 plt.show()
 
+# Gráfico que compara as velocidades do saltador em função do tempo geradas pelo
+# modelo com os dados do salto
 plt.scatter(Tv, V, label = 'Dados do Salto', marker = 'o', color = 'black')
 plt.plot(t, velocidade, label = 'Modelo')
 plt.legend(fontsize = 14)
@@ -143,8 +154,10 @@ plt.show()
 EC = []
 EG = []
 EM = []
-SomaTD = [0]
+TD = [0]
 
+# Analisamos a Energia Mecânica e o Trabalho da Resist. do Ar antes da abertura
+# do paraquedas
 t = np.arange(0, 290 + delta_t, delta_t)
 
 p_validacao = []
@@ -154,40 +167,29 @@ for i in range(len(t)):
     v_validacao.append(velocidade[i])
     
 for h in p_validacao: 
-    EG.append(peso * k_gravidade(h) * h)
+    EG.append(peso * k_gravidade(h) * h) # Energia Potencial Gravitacional
 
 for v in v_validacao:
-    EC.append((peso * v ** 2) / 2)
+    EC.append((peso * v ** 2) / 2) # Energia Cinética
     
 for e in range(len(EC)):
-    EM.append(EC[e] + EG[e])
+    EM.append(EC[e] + EG[e]) # Energia Mecânica
     
 for i in range(1, len(p_validacao)):
-    SomaTD.append(SomaTD[i-1] + drag(p_validacao[i], dAr(p_validacao[i]),
+    # Trabalho da Resistência do Ar
+    TD.append(drag(p_validacao[i], dAr(p_validacao[i]),
                    v_validacao[i]) * (p_validacao[i-1] - p_validacao[i]))
     
-plt.plot(t, EM, label = 'Energia Mecância')
-plt.plot(t, SomaTD, label = '∑ Trabalho Drag')
-plt.legend(fontsize = 14)
-plt.xlabel('Tempo (s)', size = 14)
-plt.ylabel('Energia (J)', size = 14)
-plt.xticks(fontsize = 14)
-plt.yticks(fontsize = 14)
-plt.title('Validação', size = 14)
-plt.grid(True)
-plt.show()
-
-TD = []
 delta_EM = []
 validacao = [0]
 
-for i in range(1, len(SomaTD)):
-    TD.append(SomaTD[i] - SomaTD[i-1])
-    delta_EM.append(EM[i] - EM[i-1])
-    validacao.append(TD[i-1] + delta_EM[i-1])
-    
+for i in range(1, len(TD)):
+    delta_EM.append(EM[i] - EM[i-1]) # ∆ Energia Mecânica
+    validacao.append(TD[i-1] + delta_EM[i-1]) # ∆ Energia Mecância - Trabalho Far
+
+# Gráfico de Validação    
 plt.plot(t[1:], delta_EM, label = '∆EM') 
-plt.plot(t[1:], TD, label = 'Trabalho Drag')
+plt.plot(t, TD, label = 'Trabalho Drag')
 plt.plot(t, validacao, label = '∆EM - Trabalho Drag')
 plt.legend(fontsize = 14)
 plt.grid(True)
@@ -198,10 +200,7 @@ plt.xticks(fontsize = 14)
 plt.yticks(fontsize = 14)
 plt.show()
 
-
-#GRÁFICO CONCLUSIVO
-#Felix alcançou 338 m/s
-#A Velocidade do som é de 330 m/s
+# Levando em consideração a variação de massa
 def EqDif2(Ci, t, m):
     sy = Ci[0]
     vy = Ci[1]
@@ -214,12 +213,15 @@ def EqDif2(Ci, t, m):
 
 lista_altitudes = np.arange(33000,40001,25)
 lista_massa = np.arange(60, 121, 15)
+
+# O ponto de velocidade máxima ocorre antes dos primeiros 200 segundos
 t = np.arange(0, 200 + delta_t, delta_t)
 for massa in lista_massa:
     resultados_velox = []
     resultados_posic = []
     velocidade2 = []
-    m = massa + peso_traje    
+    m = massa + peso_traje  
+    # Encontrando as velocidades máximas em função da altitude inicial
     for alts in lista_altitudes:
         CI = [alts, v_inicial]
         solucao = odeint(EqDif2,CI,t, args = (m,))
@@ -234,14 +236,15 @@ for massa in lista_massa:
         resultados_velox.append(max(velocidade2))
         resultados_posic.append(max(solucao[:,0])/1000)
         
-    
+    # Encontrando a altitude mínima para se alcançar a velocidade do som
     for e in range(len(resultados_velox)):
         if resultados_velox[e] >= 330:
             posic = resultados_posic[e]         
             plt.plot(resultados_posic[e], resultados_velox[e],
                      marker = 'o', color = 'black')
             break
-
+        
+# Plotando o gráfico que responde a pergunta
     plt.plot(resultados_posic, resultados_velox,
              label = 'm = {0}kg'.format(massa))
 plt.grid(True)
@@ -253,8 +256,13 @@ plt.xticks(fontsize = 14)
 plt.yticks(fontsize = 14)
 plt.show()
 
+# Aumentamos o escopo do estudo e analisamos massas maiores para ver como a
+# altitude inicial para atingir 330 m/s varia em função da massa
 lista_massa = np.arange(100, 1000, 50)
 lista_altitudes = np.arange(15000, 40000, 200)
+
+# Repetimos os passos que encontram a velocidade máxima e a altitude mínima para
+# atingir a velocidade do som
 for massa in lista_massa:
     resultados_velox = []
     resultados_posic = []
@@ -277,7 +285,8 @@ for massa in lista_massa:
     
     for e in range(len(resultados_velox)):
         if resultados_velox[e] >= 330:
-            posic = resultados_posic[e] / 1000        
+            posic = resultados_posic[e] / 1000  
+            # Gráfico Conclusivo
             plt.plot(massa, posic, marker = 'o', color = 'darkblue')
             break
 plt.grid(True)
