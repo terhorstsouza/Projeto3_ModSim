@@ -134,7 +134,7 @@ for i in range(len(resultado[:,1])):
         velocidade.append(-resultado[:,1][i])
     else:
         velocidade.append(0)
-
+'''
 # Gráfico que compara as posições do saltador em função do tempo geradas pelo
 # modelo com os dados do salto
 plt.plot(t, posicao, label = 'Modelo', lw = 2.5)
@@ -316,7 +316,7 @@ plt.ylabel('Altitude Inicial (km)', size = 14)
 plt.xticks(fontsize = 14)
 plt.yticks(fontsize = 14)
 plt.show()
-
+'''
 ''' ANIMAÇÃO '''
 
 import pygame
@@ -331,8 +331,8 @@ lista_veloks = velocidade
 
 posics = np.arange(100001 - 20520, 0, -1)
 
-comprimento_display = 400
-altura_display = 400
+comprimento_display = 602
+altura_display = 603
 
 tela = pygame.display.set_mode((comprimento_display, altura_display))
 pygame.display.set_caption("Python/Pygame Animation")
@@ -358,63 +358,67 @@ class Paraquedista(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, end, velocity):
             pygame.sprite.Sprite.__init__(self)
             self.lista_veloks = velocity
-            self.x = x
-            self.y = y
+            self.centerx = x
+            self.bottomy = y
             self.width = width
             self.height = height
             self.end = end
-            self.path = [self.x, self.end]
+            self.path = [self.centerx, self.end]
             self.walkCount = 0
             self.contador = 0
             self.vel = 6
             self.rect = self.andando_esquerda[self.walkCount].get_rect()
-            self.rect.x = self.x
-            self.rect.y = self.y
+            self.rect.centerx = self.centerx
+            self.rect.bottom = self.bottomy
 
     def draw(self,tela):
 
 
         self.move()
-        if (self.walkCount + 1) >= 10:
+        if (self.walkCount + 1) >= 33:
             self.walkCount = 0   
         
         if self.vel > 0:
-            tela.blit(self.andando_esquerda[self.walkCount //3], (self.x, self.y))
+            tela.blit(self.andando_esquerda[self.walkCount //3], (self.centerx, self.bottomy))
             self.walkCount += 1
 
 
 
         else:
-            tela.blit(self.queda, (self.x, self.y))
+            velocityy = self.lista_veloks[self.contador]
+            if velocityy >= 47:
+                tela.blit(self.queda, (self.centerx, self.bottomy))
+            else:
+                tela.blit(self.queda_paraquedas, (self.centerx- 15, self.bottomy - 50))
         pygame.display.flip()
-        tela_plano_de_fundo = pygame.image.load('Plano_fundo.png')
+        tela_plano_de_fundo = pygame.image.load('BackgroundGrade.png')
         tela.blit(tela_plano_de_fundo,[0,0])
         
 
     def move(self):
         if self.contador >= 0:
             if self.vel > 0:
-                if self.x > self.path[1]:
-                    self.x -= self.vel
-                if self.x <= self.path[1]:
+                if self.centerx > self.path[1]:
+                    self.centerx -= self.vel
+                if self.centerx <= self.path[1]:
                     self.vel = 0
             if self.vel == 0:
-                if self.x <= self.path[1]:
+                if self.centerx <= self.path[1]:
                     velocityy = self.lista_veloks[self.contador]
                     print(velocityy)
-                    self.y += velocityy/20
+                    self.bottomy += velocityy/9.1
                     self.contador += 1000
 
 
-        self.rect.x = self.x
-        self.rect.y = self.y
+        self.rect.centerx = self.centerx
+        self.rect.bottom = self.bottomy
 
 saltador = pygame.sprite.Group()
 vel = 0
 def animacao():
 
 
-    paraquedistaa = Paraquedista((comprimento_display / 2) + 10, 25, 25, 25,
+    paraquedistaa = Paraquedista((comprimento_display / 2), 75, 25, 25,
                                  375, velocidade)
     saltador.add(paraquedistaa)
 
