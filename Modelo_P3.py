@@ -17,6 +17,7 @@ Ts = [0, 9.375, 18.75, 26.875, 33.75, 40.000000000000014, 47.5, 53.75,
       119.37500000000001, 134.375, 151.875, 166.25000000000006, 
       183.75000000000006, 209.37500000000006, 226.25000000000006, 
       245.62500000000006, 265.00000000000006, 286.8750000000001]
+
 S = [39056.6037735849, 38773.58490566038, 37452.83018867925, 35754.71698113207,
      33962.264150943396, 31981.132075471694, 29339.62264150943, 
      27358.490566037734, 25094.33962264151, 23018.867924528302,
@@ -70,7 +71,7 @@ altura_paraquedas = 1524 # altitude na qual Felix Baumgartner abriu o paraquedas
 
 v_inicial = 0 # Velocidade inicial
 
-
+# Calculando a Força de Resistência do Ar
 def drag(sy, d, velocidade):
     # Os valores de Cd foram encontrados na Literatura
     if sy > altura_paraquedas:
@@ -82,17 +83,26 @@ def drag(sy, d, velocidade):
     Far = Cd * ((d * velocidade ** 2) / 2) * area
     return Far
 
+# Calculando a aceleração da gravidade
 def k_gravidade(altitude):
     # Linha de tendência dos pontos encontrados na Literatura
     # Para a faixa trabalhada podemos assumir que é uma reta
     gravidade = (-0.0000030646) * altitude + 9.8066215751
     return gravidade
 
+# Calculando a densidade do ar
 def dAr(altitude):
     # Linha de tendência dos pontos encontrados na Literatura
     # Para a faixa trabalhada podemos assumir que é exponencial
     densidade = 14.9812604381766 * np.exp(-0.00014471277003936 * altitude)
     return densidade
+
+# Calculando a velocidade do som
+def Vsom(altitude):
+    # Linha de tendência dos pontos encontrados na Literatura
+    # Para a faixa trabalhada podemos assumir que é linear
+    v_som = -0.004035 * altitude + 343
+    return v_som
 
 delta_t = 0.01
 
@@ -127,8 +137,8 @@ for i in range(len(resultado[:,1])):
 
 # Gráfico que compara as posições do saltador em função do tempo geradas pelo
 # modelo com os dados do salto
+plt.plot(t, posicao, label = 'Modelo', lw = 2.5)
 plt.scatter(Ts, S, label = 'Dados do Salto', marker = 'o', color = 'black')
-plt.plot(t, posicao, label = 'Modelo')
 plt.legend(fontsize = 14)
 plt.grid(True)
 plt.title('Altitude em Função do Tempo', size = 14)
@@ -140,8 +150,8 @@ plt.show()
 
 # Gráfico que compara as velocidades do saltador em função do tempo geradas pelo
 # modelo com os dados do salto
+plt.plot(t, velocidade, label = 'Modelo', lw = 2.5)
 plt.scatter(Tv, V, label = 'Dados do Salto', marker = 'o', color = 'black')
-plt.plot(t, velocidade, label = 'Modelo')
 plt.legend(fontsize = 14)
 plt.grid(True)
 plt.title('Velocidade em Função do Tempo', size = 14)
@@ -188,9 +198,9 @@ for i in range(1, len(TD)):
     validacao.append(TD[i-1] + delta_EM[i-1]) # ∆ Energia Mecância - Trabalho Far
 
 # Gráfico de Validação    
-plt.plot(t[1:], delta_EM, label = '∆EM') 
-plt.plot(t, TD, label = 'Trabalho Drag')
-plt.plot(t, validacao, label = '∆EM - Trabalho Drag')
+plt.plot(t[1:], delta_EM, label = '∆EM', lw = 4.5) 
+plt.plot(t, TD, label = 'Trabalho Drag', lw = 4.5)
+plt.plot(t, validacao, label = '∆EM - Trabalho Drag', lw = 4.5)
 plt.legend(fontsize = 14)
 plt.grid(True)
 plt.title('Validação', size = 14)
@@ -211,7 +221,7 @@ def EqDif2(Ci, t, m):
     
     return dsydt, dvydt
 
-lista_altitudes = np.arange(33000,40001,25)
+lista_altitudes = np.arange(27000, 32001, 25)
 lista_massa = np.arange(60, 121, 15)
 
 # O ponto de velocidade máxima ocorre antes dos primeiros 200 segundos
@@ -220,6 +230,7 @@ for massa in lista_massa:
     resultados_velox = []
     resultados_posic = []
     velocidade2 = []
+    posic_vmax = []
     m = massa + peso_traje  
     # Encontrando as velocidades máximas em função da altitude inicial
     for alts in lista_altitudes:
@@ -230,23 +241,29 @@ for massa in lista_massa:
         for i in range(len(solucao[:,1])):
             if solucao[:,0][i] >= 0:
                 velocidade2.append(-solucao[:,1][i])
+                if velocidade2[i] > velocidade2[i-1]:
+                    indice_max = i
             else:
                 velocidade2.append(0)
-            
-        resultados_velox.append(max(velocidade2))
-        resultados_posic.append(max(solucao[:,0])/1000)
+                
+        posic_vmax.append(solucao[:,0][indice_max]) # Lista de posição no instante de velocidade máxima para cada altitude inicial
+        resultados_velox.append(max(velocidade2)) # Lista de velocidade máxima para cada altitude inicial
+        resultados_posic.append(max(solucao[:,0]) / 1000) # Lista de altitudes iniciais
         
     # Encontrando a altitude mínima para se alcançar a velocidade do som
     for e in range(len(resultados_velox)):
-        if resultados_velox[e] >= 330:
-            posic = resultados_posic[e]         
-            plt.plot(resultados_posic[e], resultados_velox[e],
+        if resultados_velox[e] >= Vsom(posic_vmax[e]):
+            posic = resultados_posic[e]        
+            plt.plot(posic, resultados_velox[e],
                      marker = 'o', color = 'black')
+            if massa == 120:
+                print('Uma pessoa de 120 kg teria que pular de {0} para \
+                      atingir a velocidade do som.'.format(posic))
             break
         
 # Plotando o gráfico que responde a pergunta
     plt.plot(resultados_posic, resultados_velox,
-             label = 'm = {0}kg'.format(massa))
+             label = 'm = {0}kg'.format(massa), lw = 2)
 plt.grid(True)
 plt.legend(fontsize = 10)
 plt.title('Altitude do Salto x Velocidade Máxima', size = 14)
@@ -258,8 +275,8 @@ plt.show()
 
 # Aumentamos o escopo do estudo e analisamos massas maiores para ver como a
 # altitude inicial para atingir 330 m/s varia em função da massa
-lista_massa = np.arange(100, 1000, 50)
-lista_altitudes = np.arange(15000, 40000, 200)
+lista_massa = np.arange(100, 1001, 50)
+lista_altitudes = np.arange(13500, 28501, 150)
 
 # Repetimos os passos que encontram a velocidade máxima e a altitude mínima para
 # atingir a velocidade do som
@@ -267,6 +284,7 @@ for massa in lista_massa:
     resultados_velox = []
     resultados_posic = []
     velocidade2 = []
+    posic_vmax = []
     m = massa + peso_traje    
     for alts in lista_altitudes:
         CI = [alts, v_inicial]
@@ -276,15 +294,17 @@ for massa in lista_massa:
         for i in range(len(solucao[:,1])):
             if solucao[:,0][i] >= 0:
                 velocidade2.append(-solucao[:,1][i])
+                if velocidade2[i] > velocidade2[i-1]:
+                    indice_max = i
             else:
                 velocidade2.append(0)
-            
-        resultados_velox.append(max(velocidade2))
-        resultados_posic.append(max(solucao[:,0]))
-        
+
+        posic_vmax.append(solucao[:,0][indice_max]) # Lista de posição no instante de velocidade máxima para cada altitude inicial
+        resultados_velox.append(max(velocidade2)) # Lista de velocidade máxima para cada altitude inicial
+        resultados_posic.append(max(solucao[:,0])) # Lista de altitudes iniciais
     
     for e in range(len(resultados_velox)):
-        if resultados_velox[e] >= 330:
+        if resultados_velox[e] >= Vsom(posic_vmax[e]):
             posic = resultados_posic[e] / 1000  
             # Gráfico Conclusivo
             plt.plot(massa, posic, marker = 'o', color = 'darkblue')
@@ -297,7 +317,8 @@ plt.xticks(fontsize = 14)
 plt.yticks(fontsize = 14)
 plt.show()
 
-
+''' ANIMAÇÃO '''
+'''
 import pygame
 
 import numpy as np
@@ -311,7 +332,7 @@ lista_veloks = velocidade2
 posics = np.arange(100001 - 20520,0,-1)
 
 comprimento_display = 800
-altura_display = 800
+altura_display = 400
 
 tela = pygame.display.set_mode((comprimento_display, altura_display))
 pygame.display.set_caption("Python/Pygame Animation")
@@ -320,10 +341,6 @@ relogio = pygame.time.Clock()
 
 preto = (0,0,0)
 branco = (255,255,255)
-
-
-
-
 
 class Paraquedista(pygame.sprite.Sprite):
 
@@ -427,4 +444,4 @@ def loop(estado):
 estado = 1
 loop(estado)
 pygame.quit()
-
+'''
