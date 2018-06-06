@@ -298,3 +298,133 @@ plt.yticks(fontsize = 14)
 plt.show()
 
 
+import pygame
+
+import numpy as np
+
+pygame.init()
+
+nova_posicao = []
+
+lista_veloks = velocidade2
+
+posics = np.arange(100001 - 20520,0,-1)
+
+comprimento_display = 800
+altura_display = 800
+
+tela = pygame.display.set_mode((comprimento_display, altura_display))
+pygame.display.set_caption("Python/Pygame Animation")
+
+relogio = pygame.time.Clock()
+
+preto = (0,0,0)
+branco = (255,255,255)
+
+
+
+
+
+class Paraquedista(pygame.sprite.Sprite):
+
+    andando_esquerda = [pygame.image.load('Bombas_05.png'),pygame.image.load('Bombas_06.png'),
+    pygame.image.load('Bombas_07.png'),pygame.image.load('Bombas_05.png'),pygame.image.load('Bombas_06.png'),
+    pygame.image.load('Bombas_07.png'),pygame.image.load('Bombas_05.png'),pygame.image.load('Bombas_06.png'),
+    pygame.image.load('Bombas_07.png'),pygame.image.load('Bombas_05.png'),pygame.image.load('Bombas_06.png'),
+    pygame.image.load('Bombas_07.png')]
+
+    queda = pygame.image.load('Bombas_05.png')
+
+    queda_paraquedas = pygame.image.load('Bombas_23.png')
+
+
+    def __init__(self, x, y, width, height, end,velocity):
+            pygame.sprite.Sprite.__init__(self)
+            self.lista_veloks = velocity
+            self.x = x
+            self.y = y
+            self.width = width
+            self.height = height
+            self.end = end
+            self.path = [self.x, self.end]
+            self.walkCount = 0
+            self.contador = 0
+            self.vel = 6
+            self.rect = self.andando_esquerda[self.walkCount].get_rect()
+            self.rect.x = self.x
+            self.rect.y = self.y
+
+    def draw(self,tela):
+
+
+        self.move()
+        if (self.walkCount+ 1) >= 33:
+            self.walkCount = 0   
+        
+        if self.vel > 0:
+            tela.blit(self.andando_esquerda[self.walkCount //3], (self.x, self.y))
+            self.walkCount += 1
+
+
+
+        else:
+            tela.blit(self.queda, (self.x, self.y))
+        pygame.display.flip()
+        tela_plano_de_fundo = pygame.image.load('Plano_fundo.png')
+        tela.blit(tela_plano_de_fundo,[0,0])
+        
+
+    def move(self):
+        if self.contador >= 0:
+            if self.vel > 0:
+                if self.x > self.path[1]:
+                    self.x -= self.vel
+                if self.x <= self.path[1]:
+                    self.vel = 0
+            if self.vel == 0:
+                if self.x <= self.path[1]:
+                    velocityy = self.lista_veloks[self.contador]
+                    print(velocityy)
+                    self.y += velocityy/10
+                    self.contador += 1000
+
+
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+mobs = pygame.sprite.Group()
+vel = 0
+def animacao():
+
+
+    paraquedistaa = Paraquedista(700,25,25,25,375,velocidade2)
+    mobs.add(paraquedistaa)
+
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                return -1
+        
+        paraquedistaa.draw(tela)
+
+        paraquedistaa.update()
+
+        mobs.update()
+
+        relogio.tick(15)
+
+def loop(estado):
+    #enquanto o jogo esta aberto
+    while estado != -1:
+        if estado == 1:
+            
+
+            estado = animacao()
+
+    
+
+
+estado = 1
+loop(estado)
+pygame.quit()
+
