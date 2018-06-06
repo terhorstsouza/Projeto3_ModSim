@@ -383,8 +383,11 @@ class Paraquedista(pygame.sprite.Sprite):
 
 
         else:
-            velocityy = self.lista_veloks[self.contador]
-            if velocityy >= 47:
+            if self.contador > len(self.lista_veloks):
+                velocityy = 0
+            else:
+                velocityy = self.lista_veloks[self.contador]
+            if velocityy >= 47 or velocityy == 0:
                 tela.blit(self.queda, (self.centerx, self.bottomy))
             else:
                 tela.blit(self.queda_paraquedas, (self.centerx- 17, self.bottomy - 55))
@@ -402,10 +405,15 @@ class Paraquedista(pygame.sprite.Sprite):
                     self.vel = 0
             if self.vel == 0:
                 if self.centerx <= self.path[1]:
-                    velocityy = self.lista_veloks[self.contador]
-                    print(velocityy)
+                    if self.contador > len(self.lista_veloks):
+                        velocityy = 0
+                    else:
+                        velocityy = self.lista_veloks[self.contador]
                     self.bottomy += velocityy/9
                     self.contador += 1000
+                    if self.contador >= len(self.lista_veloks):
+                        self.contador = 0
+                        self.bottomy = 75
 
 
         self.rect.centerx = self.centerx
