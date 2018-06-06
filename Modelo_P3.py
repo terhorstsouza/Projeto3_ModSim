@@ -134,7 +134,7 @@ for i in range(len(resultado[:,1])):
         velocidade.append(-resultado[:,1][i])
     else:
         velocidade.append(0)
-
+'''
 # Gráfico que compara as posições do saltador em função do tempo geradas pelo
 # modelo com os dados do salto
 plt.plot(t, posicao, label = 'Modelo', lw = 2.5)
@@ -316,7 +316,7 @@ plt.ylabel('Altitude Inicial (km)', size = 14)
 plt.xticks(fontsize = 14)
 plt.yticks(fontsize = 14)
 plt.show()
-
+'''
 ''' ANIMAÇÃO '''
 
 import pygame
@@ -328,8 +328,6 @@ pygame.init()
 nova_posicao = []
 
 lista_veloks = velocidade
-
-posics = np.arange(100001 - 20520, 0, -1)
 
 comprimento_display = 602
 altura_display = 603
@@ -389,7 +387,7 @@ class Paraquedista(pygame.sprite.Sprite):
             if velocityy >= 47:
                 tela.blit(self.queda, (self.centerx, self.bottomy))
             else:
-                tela.blit(self.queda_paraquedas, (self.centerx- 15, self.bottomy - 50))
+                tela.blit(self.queda_paraquedas, (self.centerx- 17, self.bottomy - 55))
         pygame.display.flip()
         tela_plano_de_fundo = pygame.image.load('BackgroundGrade.png')
         tela.blit(tela_plano_de_fundo,[0,0])
@@ -406,7 +404,7 @@ class Paraquedista(pygame.sprite.Sprite):
                 if self.centerx <= self.path[1]:
                     velocityy = self.lista_veloks[self.contador]
                     print(velocityy)
-                    self.bottomy += velocityy/9.1
+                    self.bottomy += velocityy/9
                     self.contador += 1000
 
 
@@ -433,7 +431,7 @@ def animacao():
 
         saltador.update()
 
-        relogio.tick(10)
+        relogio.tick(120)
 
 def loop(estado):
     #enquanto o jogo esta aberto
