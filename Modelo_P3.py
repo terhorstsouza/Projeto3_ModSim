@@ -342,7 +342,7 @@ altura_display = 603
 tela = pygame.display.set_mode((comprimento_display, altura_display))
 pygame.display.set_caption("Python/Pygame Animation")
 
-#Definindo os frames por segundo
+#Definindo a variavel que receberá os frames por segundo
 relogio = pygame.time.Clock()
 
 #Definindo cores
