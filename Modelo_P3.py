@@ -134,7 +134,7 @@ for i in range(len(resultado[:,1])):
         velocidade.append(-resultado[:,1][i])
     else:
         velocidade.append(0)
-'''
+
 # Gráfico que compara as posições do saltador em função do tempo geradas pelo
 # modelo com os dados do salto
 plt.plot(t, posicao, label = 'Modelo', lw = 2.5)
@@ -316,7 +316,7 @@ plt.ylabel('Altitude Inicial (km)', size = 14)
 plt.xticks(fontsize = 14)
 plt.yticks(fontsize = 14)
 plt.show()
-'''
+
 ''' ANIMAÇÃO '''
 
 import pygame
