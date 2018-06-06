@@ -353,9 +353,10 @@ class Paraquedista(pygame.sprite.Sprite):
     queda_paraquedas = pygame.image.load('Bombas_23.png')
 
 
-    def __init__(self, x, y, width, height, end, velocity):
+    def __init__(self, x, y, width, height, end, velocity, position):
             pygame.sprite.Sprite.__init__(self)
             self.lista_veloks = velocity
+            self.position = position
             self.centerx = x
             self.bottomy = y
             self.width = width
@@ -387,7 +388,7 @@ class Paraquedista(pygame.sprite.Sprite):
                 velocityy = 0
             else:
                 velocityy = self.lista_veloks[self.contador]
-            if velocityy >= 47 or velocityy == 0:
+            if self.position[self.contador] >= 1524:
                 tela.blit(self.queda, (self.centerx, self.bottomy))
             else:
                 tela.blit(self.queda_paraquedas, (self.centerx- 17, self.bottomy - 55))
@@ -409,11 +410,11 @@ class Paraquedista(pygame.sprite.Sprite):
                         velocityy = 0
                     else:
                         velocityy = self.lista_veloks[self.contador]
-                    self.bottomy += velocityy/9
-                    self.contador += 1000
-                    if self.contador >= len(self.lista_veloks):
+                    self.bottomy += velocityy/(7.8 * 4)
+                    self.contador += 250
+                    if self.contador >= len(self.lista_veloks) - 14000:
                         self.contador = 0
-                        self.bottomy = 75
+                        self.bottomy = 10
 
 
         self.rect.centerx = self.centerx
@@ -424,8 +425,8 @@ vel = 0
 def animacao():
 
 
-    paraquedistaa = Paraquedista((comprimento_display / 2), 75, 25, 25,
-                                 375, velocidade)
+    paraquedistaa = Paraquedista((comprimento_display / 2), 10, 25, 25,
+                                 375, velocidade, posicao)
     saltador.add(paraquedistaa)
 
     while True:
