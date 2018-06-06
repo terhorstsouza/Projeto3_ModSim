@@ -318,7 +318,7 @@ plt.yticks(fontsize = 14)
 plt.show()
 
 ''' ANIMAÇÃO '''
-'''
+
 import pygame
 
 import numpy as np
@@ -327,11 +327,11 @@ pygame.init()
 
 nova_posicao = []
 
-lista_veloks = velocidade2
+lista_veloks = velocidade
 
-posics = np.arange(100001 - 20520,0,-1)
+posics = np.arange(100001 - 20520, 0, -1)
 
-comprimento_display = 800
+comprimento_display = 400
 altura_display = 400
 
 tela = pygame.display.set_mode((comprimento_display, altura_display))
@@ -355,7 +355,7 @@ class Paraquedista(pygame.sprite.Sprite):
     queda_paraquedas = pygame.image.load('Bombas_23.png')
 
 
-    def __init__(self, x, y, width, height, end,velocity):
+    def __init__(self, x, y, width, height, end, velocity):
             pygame.sprite.Sprite.__init__(self)
             self.lista_veloks = velocity
             self.x = x
@@ -375,7 +375,7 @@ class Paraquedista(pygame.sprite.Sprite):
 
 
         self.move()
-        if (self.walkCount+ 1) >= 33:
+        if (self.walkCount + 1) >= 10:
             self.walkCount = 0   
         
         if self.vel > 0:
@@ -402,20 +402,21 @@ class Paraquedista(pygame.sprite.Sprite):
                 if self.x <= self.path[1]:
                     velocityy = self.lista_veloks[self.contador]
                     print(velocityy)
-                    self.y += velocityy/10
+                    self.y += velocityy/20
                     self.contador += 1000
 
 
         self.rect.x = self.x
         self.rect.y = self.y
 
-mobs = pygame.sprite.Group()
+saltador = pygame.sprite.Group()
 vel = 0
 def animacao():
 
 
-    paraquedistaa = Paraquedista(700,25,25,25,375,velocidade2)
-    mobs.add(paraquedistaa)
+    paraquedistaa = Paraquedista((comprimento_display / 2) + 10, 25, 25, 25,
+                                 375, velocidade)
+    saltador.add(paraquedistaa)
 
     while True:
         for evento in pygame.event.get():
@@ -426,9 +427,9 @@ def animacao():
 
         paraquedistaa.update()
 
-        mobs.update()
+        saltador.update()
 
-        relogio.tick(15)
+        relogio.tick(10)
 
 def loop(estado):
     #enquanto o jogo esta aberto
@@ -444,4 +445,3 @@ def loop(estado):
 estado = 1
 loop(estado)
 pygame.quit()
-'''
