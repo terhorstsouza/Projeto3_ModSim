@@ -134,7 +134,7 @@ for i in range(len(resultado[:,1])):
         velocidade.append(-resultado[:,1][i])
     else:
         velocidade.append(0)
-'''
+        
 # Gráfico que compara as posições do saltador em função do tempo geradas pelo
 # modelo com os dados do salto
 plt.plot(t, posicao, label = 'Modelo', lw = 2.5)
@@ -316,7 +316,7 @@ plt.ylabel('Altitude Inicial (km)', size = 14)
 plt.xticks(fontsize = 14)
 plt.yticks(fontsize = 14)
 plt.show()
-'''
+
 #--------------------------------------------------------------------------------------------------
 ''' ANIMAÇÃO '''
 #--------------------------------------------------------------------------------------------------
@@ -399,7 +399,6 @@ class Paraquedista(pygame.sprite.Sprite):
             self.walkCount += 1
 
 
-
         else:
             if self.contador > len(self.lista_veloks):
                 velocityy = 0
@@ -410,7 +409,8 @@ class Paraquedista(pygame.sprite.Sprite):
             else:
                 tela.blit(self.queda_paraquedas, (self.centerx- 17, self.bottomy - 55))
         
-        #Atualizando a tela e desenhando a imagem de fundo
+        #Atualizando a tela e desenhando a imagem de fundo e velocidade na tela
+        mensagem('Velocidade: {0} m/s'.format(int(velocityy)), 100, 15, 30, preto)
         pygame.display.flip()
         tela_plano_de_fundo = pygame.image.load('BackgroundGrade.png')
         tela.blit(tela_plano_de_fundo,[0,0])
@@ -445,6 +445,18 @@ class Paraquedista(pygame.sprite.Sprite):
 
         self.rect.centerx = self.centerx
         self.rect.bottom = self.bottomy
+        
+def mensagem(mensagem, x, y, tamanho, COR):
+   
+    def textos(mensagem, fonte):
+        textSurface = fonte.render(mensagem, True, COR)
+        return textSurface, textSurface.get_rect()
+
+    texto = pygame.font.SysFont('avenir', tamanho)
+    TextSurf, TextRect = textos(mensagem, texto)
+    TextRect.center = (x, y)
+    tela.blit(TextSurf, TextRect)
+
 
 #Aqui criamos um grupo de sprites
 saltador = pygame.sprite.Group()
@@ -456,8 +468,7 @@ def animacao():
     #Aqui nos criamos o paraquedista, ou seja, nosso personagem
     paraquedistaa = Paraquedista((comprimento_display / 2), 10, 25, 25,
                                  375, velocidade, posicao)
-
-
+    
     #Aqui adicionamos nosso paraquedista num grupo de sprites
     saltador.add(paraquedistaa)
     
