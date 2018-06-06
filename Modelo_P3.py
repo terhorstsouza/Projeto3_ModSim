@@ -317,42 +317,55 @@ plt.xticks(fontsize = 14)
 plt.yticks(fontsize = 14)
 plt.show()
 '''
+#--------------------------------------------------------------------------------------------------
 ''' ANIMAÇÃO '''
+#--------------------------------------------------------------------------------------------------
 
 import pygame
 
 import numpy as np
 
+#Iniciando o pygame
 pygame.init()
 
+#Lista de Posições
 nova_posicao = []
 
+#Chamando a lista de velocidades obtidas do nosso modelo
 lista_veloks = velocidade
 
+#Definindo o tamanho da tela da animação
 comprimento_display = 602
 altura_display = 603
 
+#Criando a tela 
 tela = pygame.display.set_mode((comprimento_display, altura_display))
 pygame.display.set_caption("Python/Pygame Animation")
 
+#Definindo os frames por segundo
 relogio = pygame.time.Clock()
 
+#Definindo cores
 preto = (0,0,0)
 branco = (255,255,255)
 
+#Classe do "Personagem" 
 class Paraquedista(pygame.sprite.Sprite):
 
+    #Lista com as imagens do personagem andando para a esquerda
     andando_esquerda = [pygame.image.load('Bombas_05.png'),pygame.image.load('Bombas_06.png'),
     pygame.image.load('Bombas_07.png'),pygame.image.load('Bombas_05.png'),pygame.image.load('Bombas_06.png'),
     pygame.image.load('Bombas_07.png'),pygame.image.load('Bombas_05.png'),pygame.image.load('Bombas_06.png'),
     pygame.image.load('Bombas_07.png'),pygame.image.load('Bombas_05.png'),pygame.image.load('Bombas_06.png'),
     pygame.image.load('Bombas_07.png')]
 
+    #Variavel que recebe a imagem do personagem caindo
     queda = pygame.image.load('Bombas_05.png')
 
+    #Variavel que recebe a imagem do personagem caindo com paraquedas
     queda_paraquedas = pygame.image.load('Bombas_23.png')
 
-
+    #Inicio da classe com definição de variaveis importantes
     def __init__(self, x, y, width, height, end, velocity, position):
             pygame.sprite.Sprite.__init__(self)
             self.lista_veloks = velocity
@@ -370,13 +383,17 @@ class Paraquedista(pygame.sprite.Sprite):
             self.rect.centerx = self.centerx
             self.rect.bottom = self.bottomy
 
+    #Aqui se desenha o personagem na tela
     def draw(self,tela):
 
-
+        #Aqui chama-se a função Move logo abaixo que é responsavel pelo movimento do personagem
         self.move()
+
+        #Contador
         if (self.walkCount + 1) >= 33:
             self.walkCount = 0   
         
+        #Definindo qual imagem desenhar na tela
         if self.vel > 0:
             tela.blit(self.andando_esquerda[self.walkCount //3], (self.centerx, self.bottomy))
             self.walkCount += 1
@@ -392,12 +409,16 @@ class Paraquedista(pygame.sprite.Sprite):
                 tela.blit(self.queda, (self.centerx, self.bottomy))
             else:
                 tela.blit(self.queda_paraquedas, (self.centerx- 17, self.bottomy - 55))
+        
+        #Atualizando a tela e desenhando a imagem de fundo
         pygame.display.flip()
         tela_plano_de_fundo = pygame.image.load('BackgroundGrade.png')
         tela.blit(tela_plano_de_fundo,[0,0])
         
-
+    #Essa função é responsavel por realizar a movimentação do personagem
     def move(self):
+
+        #Enquanto o contador for maior ou igual a zero, ele vai cair verticalmente no eixo X (no centro da tela)
         if self.contador >= 0:
             if self.vel > 0:
                 if self.centerx > self.path[1]:
@@ -406,12 +427,17 @@ class Paraquedista(pygame.sprite.Sprite):
                     self.vel = 0
             if self.vel == 0:
                 if self.centerx <= self.path[1]:
+
+                    #Processo inicial para fazer o loop infinito, se o contador for maior que o comprimento
                     if self.contador > len(self.lista_veloks):
                         velocityy = 0
                     else:
                         velocityy = self.lista_veloks[self.contador]
                     self.bottomy += velocityy/(7.8 * 4)
                     self.contador += 250
+
+                    #Aqui se concretiza o loop infinito, caso o contador seja maior ou igual ao comprimento da lista de velocidades - 1400, 
+                    #ele define o valor do contador de volta para zero e coloca ele novamente no topo da tela
                     if self.contador >= len(self.lista_veloks) - 14000:
                         self.contador = 0
                         self.bottomy = 10
@@ -420,34 +446,46 @@ class Paraquedista(pygame.sprite.Sprite):
         self.rect.centerx = self.centerx
         self.rect.bottom = self.bottomy
 
+#Aqui criamos um grupo de sprites
 saltador = pygame.sprite.Group()
 vel = 0
+
+#Esta função é responsavel por rodar o jogo
 def animacao():
 
-
+    #Aqui nos criamos o paraquedista, ou seja, nosso personagem
     paraquedistaa = Paraquedista((comprimento_display / 2), 10, 25, 25,
                                  375, velocidade, posicao)
-    saltador.add(paraquedistaa)
 
+
+    #Aqui adicionamos nosso paraquedista num grupo de sprites
+    saltador.add(paraquedistaa)
+    
+    #Esta parte do codigo serve para que quando se clique no X da tela, ele saia do jogo (no caso, da nossa animação)
     while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 return -1
         
+        #Aqui ele desenha o paraquedista na tela
         paraquedistaa.draw(tela)
 
+        #Aqui ele atualiza nosso personagem
         paraquedistaa.update()
 
+        #Aqui atualizamos o grupo de sprites
         saltador.update()
 
+        #Aqui definimos o frame per second da animação
         relogio.tick(120)
 
+#Aqui é a  função loop, responsavel por rodar o jogo ad eternum
 def loop(estado):
     #enquanto o jogo esta aberto
     while estado != -1:
         if estado == 1:
             
-
+            #Chama a função animação
             estado = animacao()
 
     
@@ -455,4 +493,6 @@ def loop(estado):
 
 estado = 1
 loop(estado)
+
+#Aqui se sai do Pygame
 pygame.quit()
